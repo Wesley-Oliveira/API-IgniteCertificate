@@ -15,12 +15,13 @@
   "scripts": {
     "dev": "node node_modules/puppeteer-core/install.js && serverless offline",
     "dynamo:start": "serverless dynamodb start",
-    "deploy": "sls deploy -v"
+    "deploy": "node node_modules/puppeteer-core/install.js && sls deploy -v"
   },
   "devDependencies": {
     "@serverless/typescript": "^2.23.0",
     "@types/aws-lambda": "^8.10.71",
     "@types/node": "^14.14.25",
+    "copy-webpack-plugin": "^9.0.1",
     "json-schema-to-ts": "^1.5.0",
     "serverless": "^2.23.0",
     "serverless-dynamodb-local": "^0.2.40",
