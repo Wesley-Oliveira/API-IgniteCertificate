@@ -42,18 +42,40 @@ export const handle = async (event) => {
     const medalPath = path.join(process.cwd(), "src", "templates", "selo.png");
     const medal = fs.readFileSync(medalPath, "base64");
 
-    const data: ITemplate {
-        date: dayjs().format("DD//MM/YYYY"),
-        grade,
-        name,
+    const data: ITemplate = {
         id,
-        medal
+        name,
+        grade,
+        date: dayjs().format("DD//MM/YYYY"),
+        medal,
     }
 
     // Generate certificate
-    // Compiling using handlebars -> Transform on PDF -> Save on S3
+    // Compiling using handlebars
     const content = await compile(data);
 
+    // Transform on PDF
+    const browser = await chromium.puppeteer.launch({
+        headless: true,
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(content);
+    
+    const pdf = await page.pdf({
+        format: "a4",
+        landscape: true,
+        path: process.env.IS_OFFLINE ? "certificate.pdf" : null,
+        printBackground: true,
+        preferCSSPageSize: true,
+    });
+
+    await browser.close();
+
+    // Save on S3
     return {
         statusCode: 201,
         body: JSON.stringify({
